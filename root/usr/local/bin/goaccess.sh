@@ -1,23 +1,57 @@
 #!/bin/sh
 
-echo -e "Variables set:\\n\
-PUID=${PUID}\\n\
-PGID=${PGID}\\n"
+# Path to the GoAccess configuration file
+CONFIG_FILE="/config/goaccess.conf"
 
-# create necessary config dirs if not present
-mkdir -p /config/html
-mkdir -p /config/data
-mkdir -p /opt/log
+[ -f ${CONFIG_FILE} ] || die "Config file missing at /config/goaccess.conf"
 
-# copy default goaccess config if not present
-[ -f /config/goaccess.conf ] || cp /opt/goaccess.conf /config/goaccess.conf
+# Extract all log-file paths
+LOG_FILES=$(grep '^log-file' "$CONFIG_FILE" | awk '{print $2}')
 
-# create an empty access.log file so goaccess does not crash if not exist
-[ -f /opt/log/access.log ] || touch /opt/log/access.log
+# Build the zcat command for all files
+ZCAT_CMD=""
+files_found="0"
 
-# make things easier on the users with access to the folders
-chmod -R 777 /config
+for FILE in $LOG_FILES; do
+  if [ -f "$FILE" ] ; then
+    echo "INFO: Adding log file: $FILE"
 
-# ready to go
+    # Check if the file is a .gz file
+    if [ "${FILE##*.}" = "gz" ]; then
+      files_found="1"
+      # Append zcat for .gz files
+      ZCAT_CMD="$ZCAT_CMD $FILE"
+    fi
+
+    # Check for additional compressed files (${FILE}.*.gz)
+    echo "INFO: Checking for compressed files: ${FILE}.*.gz"
+    for GZ_FILE in ${FILE}.*.gz; do
+      if [ -f "$GZ_FILE" ]; then
+        files_found="1"
+        echo "INFO: Adding compressed log files: ${FILE}.*.gz"
+        ZCAT_CMD="$ZCAT_CMD ${FILE}.*.gz"
+        break
+      fi
+    done
+
+  else
+    echo "WARN: Log file not found: $FILE"
+  fi
+done
+
+if [ "${files_found}" = "1" ] ; then
+  ZCAT_CMD="zcat$ZCAT_CMD"
+fi
+
+# Remove the trailing pipe and build the full command
+FULL_CMD="$ZCAT_CMD | goaccess - --no-global-config --config-file=$CONFIG_FILE"
+
+echo "Full command: ${FULL_CMD}"
+
+# ready to go 
 /sbin/tini -s -- nginx -c /opt/nginx.conf
-/sbin/tini -s -- goaccess --no-global-config --config-file=/config/goaccess.conf
+
+#/sbin/tini -s -- zcat /opt/log/access.log.*.gz | goaccess --no-global-config --config-file=/config/goaccess.conf
+
+# Run the command with /sbin/tini
+exec /sbin/tini -s -- sh -c "$FULL_CMD"

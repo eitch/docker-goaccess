@@ -1,54 +1,52 @@
 # docker-goaccess
 
-This is a fork of https://github.com/GregYankovoy/docker-goaccess
+This is a fork of https://github.com/jakubstrama/docker-goaccess
 
 This is an Alpine linux container which builds GoAccess including GeoIP. It reverse proxies the GoAccess HTML files and websockets through nginx, allowing GoAccess content to be viewed without any other setup.
 
 # Version
 
-- 1.7.2
+- 1.9.3
 
 # Usage
 
 ## Example docker build and push
 
 ```
-docker build -t docker-goaccess:1.7.2 .
-docker tag docker-goaccess:1.7.2 jakubstrama/docker-goaccess:1.7.2
-docker push jakubstrama/docker-goaccess:1.7.2
+geolite_version="XX"
+geolite_city_link="XXX"
+docker build --build-arg geolite_city_link=$geolite_city_link --build-arg geolite_version=$geolite_version -t docker-goaccess:1.9.3 .
+docker tag docker-goaccess:1.9.3 eitch/docker-goaccess:1.9.3
+docker push eitch/docker-goaccess:1.9.3
 ```
 
 ## Docker pull
 
 ```
-docker pull jakubstrama/docker-goaccess
+docker pull eitch/docker-goaccess
 ```
 
 ## Example docker run
 
 ```
-docker run -d --restart unless-stopped --name goaccess --network nginxproxy_default -p 7889:7889 -v ~/nginxproxy/data/logs:/opt/log -v ~/docker-goaccess:/config jakubstrama/docker-goaccess
+docker run --rm --name goaccess -p 7889:7889 -v $PWD/logs:/srv/logs -v $PWD/public:/srv/report -v $PWD/configs/goaccess.conf:/config/goaccess.conf eitch/docker-goaccess
 ```
 
 ## Volume Mounts
 
-- /config
-  - Used to store configuration and GoAccess generated files
-- /opt/log
+- /srv/report
+  - GoAccess generated files and nginx root
+- /logs
   - Map to nginx log directory
 
 ## Variables
-
-- PUID
-  - User Id of user to run nginx & GoAccess
-- PGID
-  - User Group to run nginx & GoAccess
+**none**
 
 ## Files
 
 - /config/goaccess.conf
   - GoAccess config file (populated with default config unless modified)
-- /config/html
+- /srv/report
   - GoAccess generated static HTML
 
 ## Reverse Proxy
