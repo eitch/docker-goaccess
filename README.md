@@ -29,7 +29,8 @@ docker pull eitch/docker-goaccess
 ## Example docker run
 
 ```
-docker run --rm --name goaccess -p 7889:7889 -v $PWD/logs:/srv/logs -v $PWD/public:/srv/report -v $PWD/configs/goaccess.conf:/config/goaccess.conf eitch/docker-goaccess
+docker run --rm --name goaccess -p 7889:7889 -v $PWD/logs:/srv/logs -v $PWD/public:/srv/report -v $PWD/configs/goaccess.default.conf:/config/goaccess.conf eitch/docker-goaccess
+docker run --rm --name goaccess -p 7889:7889 -v $PWD/logs:/srv/logs -v $PWD/public:/srv/report -v $PWD/configs/goaccess.proxy.conf:/config/goaccess.conf eitch/docker-goaccess
 ```
 
 ## Volume Mounts
