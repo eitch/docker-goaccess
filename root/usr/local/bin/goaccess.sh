@@ -3,7 +3,10 @@
 # Path to the GoAccess configuration file
 CONFIG_FILE="/config/goaccess.conf"
 
-[ -f ${CONFIG_FILE} ] || die "Config file missing at /config/goaccess.conf"
+if [ ! -f ${CONFIG_FILE} ] ; then
+  echo "ERROR: Config file missing at /config/goaccess.conf"
+  exit 1
+fi
 
 # Extract all log-file paths
 LOG_FILES=$(grep '^log-file' "$CONFIG_FILE" | awk '{print $2}')
@@ -50,8 +53,6 @@ echo "Full command: ${FULL_CMD}"
 
 # ready to go 
 /sbin/tini -s -- nginx -c /opt/nginx.conf
-
-#/sbin/tini -s -- zcat /opt/log/access.log.*.gz | goaccess --no-global-config --config-file=/config/goaccess.conf
 
 # Run the command with /sbin/tini
 exec /sbin/tini -s -- sh -c "$FULL_CMD"

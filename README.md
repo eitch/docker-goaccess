@@ -16,8 +16,16 @@ This is an Alpine linux container which builds GoAccess including GeoIP. It reve
 geolite_version="XX"
 geolite_city_link="XXX"
 docker build --build-arg geolite_city_link=$geolite_city_link --build-arg geolite_version=$geolite_version -t docker-goaccess:1.9.3 .
+# for use locally
 docker tag docker-goaccess:1.9.3 eitch/docker-goaccess:1.9.3
-docker push eitch/docker-goaccess:1.9.3
+docker tag docker-goaccess:1.9.3 eitch/docker-goaccess:latest
+
+# push remote
+docker login repo.strolch.li
+sudo docker tag docker-goaccess:1.9.3 repo.strolch.li/docker/docker-goaccess:1.9.3
+sudo docker tag docker-goaccess:1.9.3 repo.strolch.li/docker/docker-goaccess:latest
+sudo docker push repo.strolch.li/docker/docker-goaccess:1.9.3
+sudo docker push repo.strolch.li/docker/docker-goaccess:latest
 ```
 
 ## Docker pull
