@@ -43,11 +43,11 @@ for FILE in $LOG_FILES; do
 done
 
 if [ "${files_found}" = "1" ] ; then
-  ZCAT_CMD="zcat$ZCAT_CMD"
+  ZCAT_CMD="zcat$ZCAT_CMD |"
 fi
 
 # Remove the trailing pipe and build the full command
-FULL_CMD="$ZCAT_CMD | goaccess - --no-global-config --config-file=$CONFIG_FILE"
+FULL_CMD="$ZCAT_CMD goaccess - --no-global-config --config-file=$CONFIG_FILE"
 
 echo "Full command: ${FULL_CMD}"
 
