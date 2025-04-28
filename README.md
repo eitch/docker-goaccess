@@ -70,6 +70,24 @@ docker run --rm --name goaccess -p 7889:7889 -v $PWD/logs:/srv/logs -v $PWD/publ
 for f in proxy-*-access.log ; do echo log-file /srv/logs/$(basename $f) | sort ; done
 ```
 
+# Configuration:
+```ini
+tz Europe/Zurich
+date-format %d/%b/%Y
+time-format %H:%M:%S
+# log-format [%d:%t %^] %^ %^ %s %^ %m %^ %v "%U" [Client %h] [Length %b] [Gzip %^] [Sent-to %^] "%u" "%R" 
+log-format [%d:%t %^] %^ %^ %s %^ %m %^ %v "%U" [Client %h] [Length %b] [Gzip %^] [Sent-to %^] "%u" "%R" [ReqTime %T] [%K %k] [%H]
+
+geoip-database /usr/local/share/GeoIP/GeoLite2-City.mmdb
+
+exclude-ip XX
+
+log-file /srv/logs/proxy-XXXXX-access.log
+
+output /srv/report/index.html
+real-time-html true
+```
+
 The result can be copied into the configuration file
 
 ## Reverse Proxy
