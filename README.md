@@ -2,30 +2,35 @@
 
 This is a fork of https://github.com/jakubstrama/docker-goaccess
 
-This is an Alpine linux container which builds GoAccess including GeoIP. It reverse proxies the GoAccess HTML files and websockets through nginx, allowing GoAccess content to be viewed without any other setup.
+This is an Alpine linux container which builds GoAccess including GeoIP. It reverse proxies the GoAccess HTML files and
+websockets through nginx, allowing GoAccess content to be viewed without any other setup.
 
 # Version
 
-- 1.9.3
+- 1.9.4
 
 # Usage
 
 ## Example docker build and push
 
 ```
+# prepare
+goaccess_version="1.9.4"
 geolite_version="2"
 geolite_city_link="XXX"
-sudo docker build --build-arg geolite_city_link=$geolite_city_link --build-arg geolite_version=$geolite_version -t docker-goaccess:1.9.3 .
+
+# build
+docker build --build-arg geolite_city_link=$geolite_city_link --build-arg geolite_version=$geolite_version -t docker-goaccess:${goaccess_version} .
 # for use locally
-sudo docker tag docker-goaccess:1.9.3 eitch/docker-goaccess:1.9.3
-sudo docker tag docker-goaccess:1.9.3 eitch/docker-goaccess:latest
+docker tag docker-goaccess:${goaccess_version} eitch/docker-goaccess:${goaccess_version}
+docker tag docker-goaccess:${goaccess_version} eitch/docker-goaccess:latest
 
 # push remote
 docker login repo.strolch.li
-sudo docker tag docker-goaccess:1.9.3 repo.strolch.li/docker/docker-goaccess:1.9.3
-sudo docker tag docker-goaccess:1.9.3 repo.strolch.li/docker/docker-goaccess:latest
-sudo docker push repo.strolch.li/docker/docker-goaccess:1.9.3
-sudo docker push repo.strolch.li/docker/docker-goaccess:latest
+docker tag docker-goaccess:${goaccess_version} repo.strolch.li/docker/docker-goaccess:${goaccess_version}
+docker tag docker-goaccess:${goaccess_version} repo.strolch.li/docker/docker-goaccess:latest
+docker push repo.strolch.li/docker/docker-goaccess:${goaccess_version}
+docker push repo.strolch.li/docker/docker-goaccess:latest
 ```
 
 ## Docker pull
@@ -44,19 +49,28 @@ docker run --rm --name goaccess -p 7889:7889 -v $PWD/logs:/srv/logs -v $PWD/publ
 ## Volume Mounts
 
 - /srv/report
-  - GoAccess generated files and nginx root
+    - GoAccess generated files and nginx root
 - /logs
-  - Map to nginx log directory
+    - Map to nginx log directory
 
 ## Variables
+
 **none**
 
 ## Files
 
 - /config/goaccess.conf
-  - GoAccess config file (populated with default config unless modified)
+    - GoAccess config file (populated with default config unless modified)
 - /srv/report
-  - GoAccess generated static HTML
+    - GoAccess generated static HTML
+
+# Generate the list of log files:
+
+```bash
+for f in proxy-*-access.log ; do echo log-file /srv/logs/$(basename $f) | sort ; done
+```
+
+The result can be copied into the configuration file
 
 ## Reverse Proxy
 
